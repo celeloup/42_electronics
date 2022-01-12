@@ -1,4 +1,10 @@
+#ifndef __AVR_ATmega328P__
+#define __AVR_ATmega328P__
+#endif
+
 #include <avr/io.h>
+
+#define F_CPU 16000000
 
 // PROGRAM TO TOGGLE LED PB1 VIA TIMER1 (OC1A pin)
 int main()

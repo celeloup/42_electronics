@@ -1,4 +1,10 @@
+#ifndef __AVR_ATmega328P__
+#define __AVR_ATmega328P__
+#endif
+
 #include <avr/io.h>
+
+#define F_CPU 16000000
 
 // PROGRAM TO TOGGLE LED PB1 VIA TIMER1 WITH A 10% DUTY CYCLE (OC1A pin)
 int main()
@@ -6,35 +12,25 @@ int main()
     // PB1 is set to output
     DDRB = (1 << PB1);
 
-    // TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-
-    // // Set to Fast PWM Mode (datasheet p.141, table 16-4)
-    // TCCR1B |= (1 << WGM12);
-    // TCCR1A |= (1 << WGM10);
-    
-    // // Toggle OC1A on Compare Match (p.140, table 16-1)
-    // TCCR1A |= (1 << COM1A1); 
-    
-    // // Set prescaler to 256 (p.143 table 16-5) (Clock select bits)
-    // TCCR1B |= (1 << CS11) | (1 << CS12);
-
-    // // Output compare register (at which value we stop) (p.121)
-    // // Frequence du CPU / prescaler / 2 -> 1Hz -> 0.5s on, 0.5s off
-    // OCR1A = 180;
-
-    OCR1A = 0x3FFF;
-
-    TCCR1A |= ((1 << COM1A1) | (1 << COM1B1));
-
-    // Fast PWM mode
+    // configure fast PWM mode 14 (p.136)
+    TCCR1B |= (1 << WGM12) | (1 << WGM13);
     TCCR1A |= (1 << WGM11);
-    TCCR1B |= (1 << WGM12)|(1 << WGM13);
+    
+    // Clear OC1A on Compare Match,
+    // set OC1A at BOTTOM (p.140 table 16-2)
+    TCCR1A |= (1 << COM1A1);
 
-    // START the timer with no prescaler
-    TCCR1B |= (1 << CS10);
+    // Set PWM frequency/top value (1Hz frequence)
+    ICR1 = F_CPU / 256;
+
+    // Set Compare Match value -> duty cycle
+    OCR1A = ICR1 / 10;
+
+    // Set prescaler to 64 and starts PWM
+    TCCR1B |= (1 << CS12);
 
     for(;;)
     {}
-        
+
     return (0);
 }
