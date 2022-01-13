@@ -10,7 +10,7 @@
 // on interruption controled by Timer0
 
 uint8_t status = 1;
-uint8_t ratio = 0;
+uint8_t ratio = 1;
 
 int main()
 {
@@ -28,30 +28,24 @@ int main()
     TCCR1A |= (1 << COM1A1);
 
     // Set PWM frequency/top value (1Hz frequence)
-    ICR1 = F_CPU / 256;
+    ICR1 = F_CPU / 64 / 200;
 
     // Set Compare Match value -> duty cycle
-    OCR1A = ICR1 / ratio;
+    OCR1A = ratio * (ICR1 / 100);
 
     // Set prescaler to 64 and starts PWM
-    TCCR1B |= (1 << CS12);
+    TCCR1B |= (1 << CS11) | (1 << CS10);
 
 // TIMER 0
 
     // CTC mode
     TCCR0A |= (1 << WGM01);
 
-    // Prescaler
-    TCCR0B |= (1 << CS02);
+    // Prescaler (1024)
+    TCCR0B |= (1 << CS02) | (1 << CS00);
 
     // Compare Match value
-    OCR0A = 5000;
-
-    // INTERRUPTION SETUP PART
-
-    // Set External Interrupt Control Register A to generate interrupt request
-    // on any logical change of INT1
-    // EICRA |= (1 << ISC10);
+    OCR0A = 78;
 
     // Timer/Counter0 Output Compare Match A Interrupt Enable
     TIMSK0 |= (1 << OCIE0A);
@@ -66,11 +60,10 @@ int main()
 }
 
 // Function called on interrupt
-void TIMER0_COMPA_vect()
+__attribute__((signal)) void TIMER0_COMPA_vect()
 {
-    status = 1;
     if (ratio == 0 || ratio == 100)
         status *= -1;
     ratio += status;
-    OCR1A = ICR1 / ratio;
+    OCR1A = ratio * (ICR1 / 100);
 }

@@ -26,10 +26,3 @@ int main()
         
     return (0);
 }
-
-// Function called on interrupt
-void INT1_vect()
-{
-    // Switch led
-    PORTB ^= (1 << PB3);
-}
