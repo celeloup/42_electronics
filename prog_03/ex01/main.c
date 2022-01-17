@@ -55,7 +55,6 @@ int main()
     TCCR1B |= (1 << CS12) | (1 << CS10);      // Prescaler 256 (p.143 table 16-5)
     OCR1A = 31250;    // Compare Match Value set to 2s
 
-
     // INTERRUPT SETUP
     TIMSK1 |= (1 << OCIE1A);    // Timer/Counter1 Output Compare Match A Interrupt Enable
     SREG |= (1 << 7);           // Enable global interrupt
