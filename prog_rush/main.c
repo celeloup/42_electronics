@@ -1,8 +1,4 @@
-#ifndef __AVR_ATmega328P__
-#define __AVR_ATmega328P__
-#endif
 #include <avr/io.h>
-
 void uart_init(uint8_t baud)
 {
     // SET BAUD RATE
