@@ -26,11 +26,11 @@ int main()
     else
         count = eeprom_read_word(0x00);
     
-    unsigned char last_state = PIND & (1 << PD3);
+    unsigned char last_state = PIND & (1 << PD2);
     PORTB = count;
     for (;;)
     {
-        unsigned char new_state = PIND & (1 << PD3);
+        unsigned char new_state = PIND & (1 << PD2);
         if (last_state != new_state)
         {
             if (new_state == 0)

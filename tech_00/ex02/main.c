@@ -6,11 +6,9 @@
 #include <string.h>
 #include <avr/eeprom.h>
 
-// Program to dump EEPROM on button push and write text on EEPROM on screen command
+// Program to dump EEPROM on button push or command and write text on EEPROM on screen command
 
 #define DEBOUCE_DELAY 50000
-uint16_t magic_number = 2;
-uint16_t count = 0;
 
 void uart_init(uint8_t baud)
 {
@@ -55,25 +53,27 @@ void dump()
             uart_tx(c);
         // uart_tx(' ');
     }
-    uart_tx('\n');
-    uart_tx('\r');
+    uart_printstr("\n\r> ");
 }
 
 char input[256] = "";
 int in = 0;
 
-void write_eeprom()
+void parse_cmd()
 {
-    if(strncmp(input, "write ", 6) != 0)
-        uart_printstr("/!\\Wrong command.\n\r/!\\Usage: write [content to write]\n\r");
-    else {
+    if (strncmp(input, "write ", 6) == 0)
+    {
         for (int j = 0; j < in - 6; j++)
             eeprom_update_byte((uint8_t *)j, input[j + 6]);
+        uart_printstr("> ");
     }
+    else if (strncmp(input, "dump", 4) == 0)
+        dump();
+    else
+        uart_printstr("   /!\\ Wrong command.\n\r   usage: - write [content to write]\n\r          - dump\n\r> ");
     input[0] = 0;
     in = 0;
 }
-
 
 __attribute__((signal)) void USART_RX_vect()
 {
@@ -89,7 +89,7 @@ __attribute__((signal)) void USART_RX_vect()
         input[in] = '\0';
         uart_tx('\n');
         uart_tx('\r');
-        write_eeprom();
+        parse_cmd();
     }
     else if (in < 255 && c != 127)
     {
@@ -107,14 +107,16 @@ int main()
     UCSR0B |= (1 << RXCIE0); // Receive complete interrupt flag
     SREG |= (1 << 7);   // Enable global interrupt
     
-    unsigned char last_state = PIND & (1 << PD3);
+    unsigned char last_state = PIND & (1 << PD2);
+    uart_printstr("> ");
     for (;;)
     {
-        unsigned char new_state = PIND & (1 << PD3);
+        unsigned char new_state = PIND & (1 << PD2);
         if (last_state != new_state)
         {
             if (new_state == 0)
             {
+                uart_printstr("[dump called]\n\r");
                 dump();
                 PORTB ^= (1 << PB3);
             }
