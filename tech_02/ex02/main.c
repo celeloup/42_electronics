@@ -55,8 +55,6 @@ uint16_t adc_read()
     return ADCH; // Read data
 }
 
-uint16_t adcVal = 0;
-
 int main()
 {
     uart_init(8);
